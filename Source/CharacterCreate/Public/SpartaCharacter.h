@@ -25,6 +25,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
 
+
 public:
 	ASpartaCharacter();
 
@@ -37,14 +38,21 @@ protected:
 	float MoveSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
 	float RotationSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
+	bool bMoveing;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
+	bool bGroundCheck;
 
 	FHitResult HitResult;
-	FCollisionQueryParams CollisionParams;
 	float LineTraceLength;
-	bool bGroundCheck;
+	
+
 
 	UFUNCTION()
 	void Move(const FInputActionValue& value);
+	UFUNCTION()
+	void MoveOff(const FInputActionValue& value);
 	UFUNCTION()
 	void Look(const FInputActionValue& value);
 	UFUNCTION()
