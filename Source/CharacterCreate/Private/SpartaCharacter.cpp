@@ -1,10 +1,14 @@
 #include "SpartaCharacter.h"
-#include "Components/CapsuleComponent.h"
+#include "SpartaGameState.h"
+#include "MyPlayerController.h"
+#include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "EnhancedInputComponent.h"
-#include "MyPlayerController.h"
 #include "GameFramework/PlayerController.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Components/TextBlock.h"
+
 
 ASpartaCharacter::ASpartaCharacter()
 {
@@ -13,13 +17,20 @@ ASpartaCharacter::ASpartaCharacter()
 	MoveSpeed = 500;
 	RotationSpeed = 500;
 	bGroundCheck = false;
-
+	MaxHealth = 100.0f;
+	Health = MaxHealth;
 
 	//Component Create
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
+
+	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
+	OverheadWidget->SetupAttachment(SkeletalMeshComp);
+	OverheadWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
+
 	//Component Tree
 	SetRootComponent(CapsuleComp);
 	SkeletalMeshComp->SetupAttachment(CapsuleComp);
@@ -31,9 +42,21 @@ ASpartaCharacter::ASpartaCharacter()
 	
 }
 
+float ASpartaCharacter::GetHealth() const
+{
+	return Health;
+}
+
+void ASpartaCharacter::AddHealth(float Amount)
+{
+	Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
+	UpdateOverheadHP();
+}
+
 void ASpartaCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	UpdateOverheadHP();
 
 	LineTraceLength = CapsuleComp->GetScaledCapsuleHalfHeight()+5;
 }
@@ -117,6 +140,25 @@ void ASpartaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			}
 		}
 	}
+}
+
+float ASpartaCharacter::TakeDamage(
+	float DamageAmount, 
+	FDamageEvent const& DamageEvent, 
+	AController* EventInstigator, 
+	AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent,EventInstigator,DamageCauser);
+
+	Health = FMath::Clamp(Health - ActualDamage, 0.0f, MaxHealth);
+	UpdateOverheadHP();
+
+	if (Health <= 0)
+	{
+		OnDeath();
+	}
+
+	return ActualDamage;
 }
 
 void ASpartaCharacter::Move(const FInputActionValue& Value)
@@ -233,16 +275,24 @@ void ASpartaCharacter::Jump(const FInputActionValue& Value)
 
 }
 
+void ASpartaCharacter::OnDeath()
+{
+	ASpartaGameState* SpartaGameState = GetWorld() ? GetWorld()->GetGameState<ASpartaGameState>() : nullptr;
+	if (SpartaGameState)
+	{
+		SpartaGameState->OnGameOver();
+	}
+}
 
-//UE_LOG(LogTemp, Warning, TEXT("Forward : %s"), *Forward.ToString());
-//UE_LOG(LogTemp, Warning, TEXT("Right : %s"), *Right.ToString());
-//UE_LOG(LogTemp, Warning, TEXT("Up : %s"), *Up.ToString());
-//UE_LOG(LogTemp, Warning, TEXT("Normal.X : %f"), Normal.X);
-//UE_LOG(LogTemp, Warning, TEXT("Normal.Y : %f"), Normal.Y);
-//UE_LOG(LogTemp, Warning, TEXT("Normal.Z : %f"), Normal.Z);
-//
-//FVector a = Forward * Normal.X;
-//FVector b = Forward * Normal.Y;
-//
-//UE_LOG(LogTemp, Warning, TEXT("Forward * Normal.X : %s"), *a.ToString());
-//UE_LOG(LogTemp, Warning, TEXT("Right * Normal.Y : %s"), *b.ToString());
+void ASpartaCharacter::UpdateOverheadHP()
+{
+	if (!OverheadWidget) return;
+
+	UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+	if (!OverheadWidgetInstance) return;
+
+	if (UTextBlock* HPText = Cast<UTextBlock>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverHeadHP"))))
+	{
+		HPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f / %.0f"), Health, MaxHealth)));
+	}
+}

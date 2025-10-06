@@ -7,6 +7,7 @@
 class UCapsuleComponent;
 class UCameraComponent;
 class USpringArmComponent;
+class UWidgetComponent;
 struct FInputActionValue;
 
 
@@ -29,24 +30,41 @@ private:
 public:
 	ASpartaCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* OverheadWidget;
+
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetHealth() const;
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void AddHealth(float Amount);
+
+
 protected:
+
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
 	float MoveSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
 	float RotationSpeed;
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
 	bool bMoveing;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
 	bool bGroundCheck;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float Health;
 
 	FHitResult HitResult;
 	float LineTraceLength;
-	
 
 
 	UFUNCTION()
@@ -58,5 +76,6 @@ protected:
 	UFUNCTION()
 	void Jump(const FInputActionValue& value);
 
-
+	void OnDeath();
+	void UpdateOverheadHP();
 };
