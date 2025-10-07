@@ -1,5 +1,6 @@
 #include "SpartaGameState.h"
 #include "SpartaGameInstance.h"
+#include "SpartaCharacter.h"
 #include "MyPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "SpawnVolume.h"
@@ -12,9 +13,12 @@ ASpartaGameState::ASpartaGameState()
 	Score = 0;
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
-	LevelDuration = 30.0f;
+	LevelDuration = 3.0f;
 	CurrentLevelIndex = 0;
 	MaxLevel = 3;
+	CurrentWaveIndex = 0;
+	MaxWave = 3;
+	ItemToSpawn = 10;
 }
 
 void ASpartaGameState::BeginPlay()
@@ -58,9 +62,6 @@ void ASpartaGameState::StartLevel()
 		}
 	}
 
-	SpawnedCoinCount = 0;
-	CollectedCoinCount = 0;
-
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(GameInstance);
@@ -70,12 +71,24 @@ void ASpartaGameState::StartLevel()
 		}
 	}
 
-	TArray<AActor*> FoundVolumes;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundVolumes);
 
-	const int32 ItemToSpawn = 40;
+	LevelInit();
+}
 
-	for (int32 i = 0; i < ItemToSpawn; i++)
+void ASpartaGameState::ReLevel()
+{
+	WaveActorDestroy();
+
+	LevelInit();
+}
+
+void ASpartaGameState::LevelInit()
+{
+	SpawnedCoinCount = 0;
+	CollectedCoinCount = 0;
+
+	for (int32 i = 0; i < ItemToSpawn*(CurrentWaveIndex+1); i++)
 	{
 		if (FoundVolumes.Num() > 0)
 		{
@@ -83,6 +96,7 @@ void ASpartaGameState::StartLevel()
 			if (SpawnVolume)
 			{
 				AActor* SpawnedActor = SpawnVolume->SpawnRandomItem();
+				WaveActors.Add(SpawnedActor);
 				if (SpawnedActor && SpawnedActor->IsA(ACoinItem::StaticClass()))
 				{
 					SpawnedCoinCount++;
@@ -90,14 +104,35 @@ void ASpartaGameState::StartLevel()
 			}
 		}
 	}
-
+	
 	GetWorldTimerManager().SetTimer(
 		LevelTimerHandle,
 		this,
-		&ASpartaGameState::OnLevelTimeUp,
-		LevelDuration,
+		&ASpartaGameState::OnWaveTimeup,
+		LevelDuration*(CurrentWaveIndex + 1),
 		false
 	);
+}
+
+void ASpartaGameState::WaveActorDestroy()
+{
+	for (int i = 0; i < WaveActors.Num(); i++)
+	{
+		WaveActors[i]->Destroy();
+	}
+}
+
+void ASpartaGameState::OnWaveTimeup()
+{
+	CurrentWaveIndex++;
+	if (CurrentWaveIndex > MaxWave - 1)
+	{
+		OnLevelTimeUp();
+	}
+	else
+	{
+		ReLevel();
+	}
 }
 
 void ASpartaGameState::OnLevelTimeUp()
@@ -108,9 +143,6 @@ void ASpartaGameState::OnLevelTimeUp()
 void ASpartaGameState::OnCoinCollected()
 {
 	CollectedCoinCount++;
-	UE_LOG(LogTemp, Warning, TEXT("Coin Collected : %d / %d"),
-		CollectedCoinCount,
-		SpawnedCoinCount);
 
 	if (0 < SpawnedCoinCount && SpawnedCoinCount <= CollectedCoinCount)
 	{
@@ -121,8 +153,6 @@ void ASpartaGameState::OnCoinCollected()
 void ASpartaGameState::EndLevel()
 {
 	GetWorldTimerManager().ClearTimer(LevelTimerHandle);
-
-	CurrentLevelIndex++;
 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
@@ -190,7 +220,16 @@ void ASpartaGameState::UpdateHUD()
 
 				if (UTextBlock* LevelText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Level"))))
 				{
-					LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level : %d"), CurrentLevelIndex)));
+					LevelText->SetText(FText::FromString(FString::Printf(TEXT("Level : %d - %d"), CurrentLevelIndex+1, CurrentWaveIndex+1)));
+				}
+
+				if (UTextBlock* HPText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HP"))))
+				{
+					ASpartaCharacter* SpartaCharacter = Cast<ASpartaCharacter>(MyPlayerController->GetPawn());
+					if (SpartaCharacter)
+					{
+						HPText->SetText(FText::FromString(FString::Printf(TEXT("HP : %.0f / %.0f"), SpartaCharacter->Health, SpartaCharacter->MaxHealth)));
+					}
 				}
 			}
 		}

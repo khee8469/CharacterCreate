@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 
 AMyPlayerController::AMyPlayerController()
 	: InputMappingContext(nullptr)
@@ -135,6 +136,16 @@ void AMyPlayerController::ShowMainMenu(bool bIsRestart)
 						FString::Printf(TEXT("Total Score : %d"), SpartaGameInstance->TotalScore)));	
 				}
 			}
+
+			if (UButton* EndButton = Cast<UButton>(MainMenuWidgetInstance->GetWidgetFromName(TEXT("EndButton"))))
+			{
+				EndButton->SetVisibility(ESlateVisibility::Hidden);
+			}
+
+			if (UButton* MainMenuButton = Cast<UButton>(MainMenuWidgetInstance->GetWidgetFromName(TEXT("MainMenuButton"))))
+			{
+				MainMenuButton->SetVisibility(ESlateVisibility::Visible);
+			}
 		}
 	}
 }
@@ -150,4 +161,14 @@ void AMyPlayerController::StartGame()
 	
 	UGameplayStatics::OpenLevel(GetWorld(), FName("BasicLevel"));
 	SetPause(false);
+}
+
+void AMyPlayerController::EndGame()
+{
+	UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, false);
+}
+
+void AMyPlayerController::MainMenuReturn()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), FName("MenuLevel"));
 }

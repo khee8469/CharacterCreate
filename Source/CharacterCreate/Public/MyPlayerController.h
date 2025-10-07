@@ -41,6 +41,11 @@ public:
 	void ShowMainMenu(bool bIsRestart);
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void EndGame();
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void MainMenuReturn();
+
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input System")

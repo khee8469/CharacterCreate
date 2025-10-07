@@ -1,5 +1,6 @@
 #include "SpawnVolume.h"
 #include "Components/BoxComponent.h"
+#include "SpartaGameState.h"
 
 ASpawnVolume::ASpawnVolume()
 {
@@ -34,7 +35,10 @@ FItemSpawnRow* ASpawnVolume::GetRandomItem() const
 	TArray<FItemSpawnRow*> AllRows; 
 	static const FString ContextString(TEXT("ItemSpawnContext")); // static const지워보자
 	
-	ItemDataTable->GetAllRows(ContextString,AllRows);
+	AGameStateBase* GameState = GetWorld()->GetGameState();
+	ASpartaGameState* SpartaGameState = Cast<ASpartaGameState>(GameState);
+
+	ItemDataTable->GetAllRows(ContextString, AllRows);
 
 	if (AllRows.IsEmpty()) return nullptr;
 

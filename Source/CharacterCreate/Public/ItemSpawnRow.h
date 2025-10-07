@@ -15,4 +15,6 @@ public:
 	TSubclassOf<AActor> ItemClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Spawnchance;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int SpawnCount;*/
 };

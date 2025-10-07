@@ -85,7 +85,10 @@ void AMineItem::Explode()
 			DestroyParticleTimerHandle,
 			[WeakParticle]()
 			{
-				WeakParticle->DestroyComponent();
+				if (WeakParticle.IsValid())
+				{
+					WeakParticle->DestroyComponent();
+				}
 			},
 			2.0f,
 			false

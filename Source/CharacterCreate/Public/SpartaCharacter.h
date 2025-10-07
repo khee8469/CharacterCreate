@@ -30,6 +30,11 @@ private:
 public:
 	ASpartaCharacter();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float Health;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	UWidgetComponent* OverheadWidget;
 
@@ -37,6 +42,7 @@ public:
 	float GetHealth() const;
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void AddHealth(float Amount);
+
 
 
 protected:
@@ -58,10 +64,7 @@ protected:
 	bool bMoveing;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
 	bool bGroundCheck;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float MaxHealth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float Health;
+	
 
 	FHitResult HitResult;
 	float LineTraceLength;
