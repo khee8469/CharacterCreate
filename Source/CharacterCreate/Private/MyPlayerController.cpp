@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
 
 AMyPlayerController::AMyPlayerController()
 	: InputMappingContext(nullptr)
@@ -41,6 +42,7 @@ void AMyPlayerController::BeginPlay()
 	if(CurrentMapName.Contains("MenuLevel"))
 	{
 		ShowMainMenu(false);
+		SetPause(true);
 	}
 }
 
@@ -171,4 +173,29 @@ void AMyPlayerController::EndGame()
 void AMyPlayerController::MainMenuReturn()
 {
 	UGameplayStatics::OpenLevel(GetWorld(), FName("MenuLevel"));
+}
+
+void AMyPlayerController::BlindImage()
+{
+	if (UImage* EndButton = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(TEXT("BlindImage"))))
+	{
+		EndButton->SetVisibility(ESlateVisibility::Visible);
+
+		FTimerHandle BlindTimer;
+		GetWorldTimerManager().SetTimer(
+			BlindTimer,
+			this,
+			&AMyPlayerController::ImageBlind,
+			3.0f,
+			false
+		);
+	}
+}
+
+void AMyPlayerController::ImageBlind()
+{
+	if (UImage* EndButton = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(TEXT("BlindImage"))))
+	{
+		EndButton->SetVisibility(ESlateVisibility::Hidden);
+	}
 }

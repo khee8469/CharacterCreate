@@ -19,7 +19,7 @@ AActor* ASpawnVolume::SpawnRandomItem()
 {
 	if (FItemSpawnRow* SelectedRow = GetRandomItem())
 	{
-		if (UClass* ActualClass = SelectedRow->ItemClass.Get()) // Get 내부에있는 uclass를 가져온다.
+		if (UClass* ActualClass = SelectedRow->ItemClass.Get())
 		{                                                       
 			return SpawnItem(ActualClass);
 		}
@@ -33,7 +33,7 @@ FItemSpawnRow* ASpawnVolume::GetRandomItem() const
 	if(!ItemDataTable) return nullptr;
 
 	TArray<FItemSpawnRow*> AllRows; 
-	static const FString ContextString(TEXT("ItemSpawnContext")); // static const지워보자
+	static const FString ContextString(TEXT("ItemSpawnContext"));
 	
 	AGameStateBase* GameState = GetWorld()->GetGameState();
 	ASpartaGameState* SpartaGameState = Cast<ASpartaGameState>(GameState);

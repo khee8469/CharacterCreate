@@ -53,6 +53,48 @@ void ASpartaCharacter::AddHealth(float Amount)
 	UpdateOverheadHP();
 }
 
+void ASpartaCharacter::DebuffSpeed()
+{
+	HalfSpeed();
+
+	FTimerHandle SpeedTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		SpeedTimer, 
+		this, 
+		&ASpartaCharacter::DoubleSpeed,
+		3.0f, 
+		false);
+}
+
+void ASpartaCharacter::ReverseControl()
+{
+	ReverseSpeed();
+
+	FTimerHandle ReverseTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		ReverseTimer,
+		this,
+		&ASpartaCharacter::ReverseSpeed,
+		3.0f,
+		false);
+}
+
+void ASpartaCharacter::HalfSpeed()
+{
+	MoveSpeed /= 2;
+}
+
+void ASpartaCharacter::DoubleSpeed()
+{
+	MoveSpeed *= 2;
+}
+
+void ASpartaCharacter::ReverseSpeed()
+{
+	MoveSpeed *= -1;
+}
+
+
 void ASpartaCharacter::BeginPlay()
 {
 	Super::BeginPlay();

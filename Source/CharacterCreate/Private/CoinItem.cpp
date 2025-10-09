@@ -7,6 +7,11 @@ ACoinItem::ACoinItem()
 	ItemType = "DefaultCoin";
 }
 
+void ACoinItem::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
 void ACoinItem::ActivateItem(AActor* Activator)
 {
 	Super::ActivateItem(Activator);

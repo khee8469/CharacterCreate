@@ -13,12 +13,12 @@ ASpartaGameState::ASpartaGameState()
 	Score = 0;
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
-	LevelDuration = 3.0f;
+	LevelDuration = 10.0f;
 	CurrentLevelIndex = 0;
 	MaxLevel = 3;
 	CurrentWaveIndex = 0;
 	MaxWave = 3;
-	ItemToSpawn = 10;
+	ItemToSpawn = 40;
 }
 
 void ASpartaGameState::BeginPlay()
@@ -88,7 +88,7 @@ void ASpartaGameState::LevelInit()
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
 
-	for (int32 i = 0; i < ItemToSpawn*(CurrentWaveIndex+1); i++)
+	for (int32 i = 0; i < ItemToSpawn; i++)
 	{
 		if (FoundVolumes.Num() > 0)
 		{

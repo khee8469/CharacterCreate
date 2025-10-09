@@ -6,6 +6,7 @@
 #include "BaseItem.generated.h"
 
 class USphereComponent;
+class UWidgetComponent;
 
 UCLASS()
 class CHARACTERCREATE_API ABaseItem : public AActor, public IItemInterface
@@ -31,7 +32,8 @@ protected:
 	UParticleSystem* PickupParticle; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Effect")
 	USoundBase* PickupSound;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* ItemOverheadWidget;
 
 	virtual void OnItemOverlap(
 		UPrimitiveComponent* OverlappedComop,
@@ -48,5 +50,7 @@ protected:
 	virtual void ActivateItem(AActor* Activator) override;
 	virtual FName GetItemType() const override;
 	
+
+	virtual void Tick(float DeltaTime) override;
 	virtual void DestroyItem();
 };

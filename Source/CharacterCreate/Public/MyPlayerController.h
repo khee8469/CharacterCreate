@@ -46,6 +46,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void MainMenuReturn();
 
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void BlindImage();
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void ImageBlind();
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input System")

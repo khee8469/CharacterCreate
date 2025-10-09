@@ -2,12 +2,13 @@
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
 ABaseItem::ABaseItem()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	Scene = CreateDefaultSubobject<USceneComponent>(TEXT("Scene"));
 	SetRootComponent(Scene);
@@ -18,6 +19,10 @@ ABaseItem::ABaseItem()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
 	StaticMesh->SetupAttachment(Scene);
+
+	ItemOverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("ItemOverheadWidget"));
+	ItemOverheadWidget->SetupAttachment(StaticMesh);
+	ItemOverheadWidget->SetWidgetSpace(EWidgetSpace::World);
 
 	Collision->OnComponentBeginOverlap.AddDynamic(this, &ABaseItem::OnItemOverlap);
 	Collision->OnComponentEndOverlap.AddDynamic(this, &ABaseItem::OnItemEndOverlap);
@@ -33,7 +38,6 @@ void ABaseItem::OnItemOverlap(UPrimitiveComponent* OverlappedComop,
 {
 	if (OtherActor && OtherActor->ActorHasTag("Player"))
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, FString::Printf(TEXT("Overlap...")));
 		ActivateItem(OtherActor);
 	}
 }
@@ -80,7 +84,10 @@ void ABaseItem::ActivateItem(AActor* Activator)
 			DestroyParticleTimerHandle,
 			[WeakParticle]()
 			{
-				WeakParticle->DestroyComponent();
+				if (WeakParticle.IsValid())
+				{
+					WeakParticle->DestroyComponent();
+				}
 			},
 			2.0f,
 			false
@@ -91,6 +98,11 @@ void ABaseItem::ActivateItem(AActor* Activator)
 FName ABaseItem::GetItemType() const
 {
 	return ItemType;
+}
+
+void ABaseItem::Tick(float DeltaTime)
+{
+	ItemOverheadWidget->AddLocalRotation(FRotator(0, 360 * DeltaTime, 0));
 }
 
 void ABaseItem::DestroyItem()

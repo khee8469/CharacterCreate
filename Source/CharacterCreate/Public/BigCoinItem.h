@@ -17,6 +17,6 @@ class CHARACTERCREATE_API ABigCoinItem : public ACoinItem
 public:
 	ABigCoinItem();
 
+	virtual void Tick(float DeltaTime) override;
 	virtual void ActivateItem(AActor* Activator) override;
-	
 };

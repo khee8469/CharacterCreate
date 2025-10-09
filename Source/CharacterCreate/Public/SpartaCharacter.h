@@ -43,6 +43,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void AddHealth(float Amount);
 
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void DebuffSpeed();
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void ReverseControl();
+	
 
 
 protected:
@@ -65,9 +70,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Controller Value")
 	bool bGroundCheck;
 	
-
 	FHitResult HitResult;
 	float LineTraceLength;
+
+	
+	float SaveMoveSpeed;
+
 
 
 	UFUNCTION()
@@ -81,4 +89,8 @@ protected:
 
 	void OnDeath();
 	void UpdateOverheadHP();
+
+	void HalfSpeed();
+	void DoubleSpeed();
+	void ReverseSpeed();
 };
