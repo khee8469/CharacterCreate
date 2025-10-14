@@ -13,12 +13,12 @@ ASpartaGameState::ASpartaGameState()
 	Score = 0;
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
-	LevelDuration = 3.0f;
+	LevelDuration = 10.0f;
 	CurrentLevelIndex = 0;
 	MaxLevel = 3;
 	CurrentWaveIndex = 0;
 	MaxWave = 3;
-	ItemToSpawn = 20;
+	ItemToSpawn = 10;
 }
 
 void ASpartaGameState::BeginPlay()
@@ -87,11 +87,11 @@ void ASpartaGameState::LevelInit()
 {
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
-	FString str = FString::Printf(TEXT("Current Wave : % d"), LevelWave);
-	GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Green, str);
-	UE_LOG(LogTemp, Warning, TEXT("Current Wave : %d"), LevelWave);
+	FString str = "Current Wave : % d" + (LevelWave+48);
+	GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Green, 
+		str);
 	
-	for (int32 i = 0; i < ItemToSpawn* (LevelWave+1); i++)
+	for (int32 i = 0; i < ItemToSpawn* LevelWave; i++)
 	{
 		if (FoundVolumes.Num() > 0)
 		{
@@ -112,7 +112,7 @@ void ASpartaGameState::LevelInit()
 		LevelTimerHandle,
 		this,
 		&ASpartaGameState::OnWaveTimeup,
-		LevelDuration,
+		LevelDuration*(CurrentWaveIndex + 1),
 		false
 	);
 }
