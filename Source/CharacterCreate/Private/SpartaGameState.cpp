@@ -13,12 +13,17 @@ ASpartaGameState::ASpartaGameState()
 	Score = 0;
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
-	LevelDuration = 3.0f;
+	
 	CurrentLevelIndex = 0;
 	MaxLevel = 3;
+
+
 	CurrentWaveIndex = 0;
 	MaxWave = 3;
-	ItemToSpawn = 20;
+	WaveDuration = 3.0f;
+	ItemToSpawnPerWave = { 20,30,40 };
+
+	//ItemToSpawn = 20;
 }
 
 void ASpartaGameState::BeginPlay()
@@ -87,32 +92,46 @@ void ASpartaGameState::LevelInit()
 {
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
-	FString str = FString::Printf(TEXT("Current Wave : % d"), LevelWave);
-	GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Green, str);
-	UE_LOG(LogTemp, Warning, TEXT("Current Wave : %d"), LevelWave);
-	
-	for (int32 i = 0; i < ItemToSpawn* (LevelWave+1); i++)
+
+	if (FoundVolumes.Num() > 0)
 	{
-		if (FoundVolumes.Num() > 0)
+		ASpawnVolume* SpawnVolume = Cast<ASpawnVolume>(FoundVolumes[0]);
+		for (int32 i = 0; i < ItemToSpawnPerWave[CurrentWaveIndex]; i++)
 		{
-			ASpawnVolume* SpawnVolume = Cast<ASpawnVolume>(FoundVolumes[0]);
-			if (SpawnVolume)
+			if (AActor* SpawnedActor = SpawnVolume->SpawnRandomItem())
 			{
-				AActor* SpawnedActor = SpawnVolume->SpawnRandomItem();
-				WaveActors.Add(SpawnedActor);
 				if (SpawnedActor && SpawnedActor->IsA(ACoinItem::StaticClass()))
 				{
 					SpawnedCoinCount++;
 				}
+				WaveActors.Add(SpawnedActor);
 			}
 		}
 	}
-	
+
+	if (CurrentWaveIndex == 0)
+	{
+		FString str = FString::Printf(TEXT("%d"), CurrentWaveIndex);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, str);
+	}
+	else if (CurrentWaveIndex == 1)
+	{
+		FString str = FString::Printf(TEXT("%d"), CurrentWaveIndex);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, str);
+		EnableWave2();
+	}
+	else if (CurrentWaveIndex == 2)
+	{
+		FString str = FString::Printf(TEXT("%d"), CurrentWaveIndex);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, str);
+		EnableWave3();
+	}
+
 	GetWorldTimerManager().SetTimer(
 		LevelTimerHandle,
 		this,
-		&ASpartaGameState::OnWaveTimeup,
-		LevelDuration,
+		&ASpartaGameState::OnWaveTimeUp,
+		WaveDuration,
 		false
 	);
 }
@@ -123,24 +142,21 @@ void ASpartaGameState::WaveActorDestroy()
 	{
 		WaveActors[i]->Destroy();
 	}
+
+	WaveActors.Empty();
 }
 
-void ASpartaGameState::OnWaveTimeup()
+void ASpartaGameState::OnWaveTimeUp()
 {
 	CurrentWaveIndex++;
-	if (CurrentWaveIndex > MaxWave - 1)
+	if (CurrentWaveIndex >= MaxWave)
 	{
-		OnLevelTimeUp();
+		EndLevel();
 	}
 	else
 	{
 		ReLevel();
 	}
-}
-
-void ASpartaGameState::OnLevelTimeUp()
-{
-	EndLevel();
 }
 
 void ASpartaGameState::OnCoinCollected()
@@ -237,4 +253,14 @@ void ASpartaGameState::UpdateHUD()
 			}
 		}
 	}
+}
+
+void ASpartaGameState::EnableWave2()
+{
+
+}
+
+void ASpartaGameState::EnableWave3()
+{
+
 }
